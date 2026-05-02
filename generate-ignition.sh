@@ -102,7 +102,7 @@ for vm in ${vms[*]}; do
                         | sed "s+###RKE2_TOKEN###+$RKE2_TOKEN+g" \
                         | butane)
                 - inline: |-
-                    $(cat $BUTANE_STATIC_DIR/butane$-CNI_PROVIDER.yaml \
+                    $(cat $BUTANE_STATIC_DIR/butane-$CNI_PROVIDER.yaml \
                         | butane)
 EOF
      elif [[ "$K8S_MODE" == "controlplane"  ]]; then
