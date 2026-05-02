@@ -41,7 +41,7 @@ RKE2_TOKEN="RKE2_SECRET_TOKEN"
 
 cert_dir="$CURRENT_DIR/certs"
 
-# Change the CNI provider to match requirement. available: cilium, calico, canal
+# Change the CNI provider to match requirement. available: cilium, calico
 CNI_PROVIDER=cilium
 
 for vm in ${vms[*]}; do 
@@ -63,7 +63,6 @@ for vm in ${vms[*]}; do
 
     if [[ "$IP_ADDR" == "$IP_RANGE_CONTROLPLANE1" ]]; then
     CLUSTERMODE="cni: $CNI_PROVIDER"
- ### Change butane-calico.yaml to butane-cilium.yaml to change the CNI preference
         cat << EOF > $BUTANE_GENERATED_DIR/butane-$vm.yaml
         variant: fcos
         version: 1.5.0
@@ -101,6 +100,9 @@ for vm in ${vms[*]}; do
                         | sed "s+###SERVICE_CIDR###+$SERVICE_CIDR+g" \
                         | sed "s+###IP_ADDRESS###+$IP_ADDR+g" \
                         | sed "s+###RKE2_TOKEN###+$RKE2_TOKEN+g" \
+                        | butane)
+                - inline: |-
+                    $(cat $BUTANE_STATIC_DIR/butane$-CNI_PROVIDER.yaml \
                         | butane)
 EOF
      elif [[ "$K8S_MODE" == "controlplane"  ]]; then

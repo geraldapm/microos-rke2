@@ -6,6 +6,16 @@ storage:
       contents:
         inline: |
           export KUBECONFIG=/etc/rancher/rke2/rke2.yaml
+          export CRI_CONFIG_FILE=/var/lib/rancher/rke2/agent/etc/crictl.yaml
+          export PATH=$PATH:/var/lib/rancher/rke2/bin
+    - path: /etc/sysctl.d/60-rke2-cis.conf
+      contents:
+        inline: |
+          vm.panic_on_oom=0
+          vm.overcommit_memory=1
+          kernel.panic=10
+          kernel.panic_on_oops=1
+          
 systemd:
   units:
     - name: install-rke2.service
@@ -21,10 +31,6 @@ systemd:
         Type=oneshot
         Environment=RKE2_VERSION=###RKE2_VERSION###
         Environment=CNI_SELECTION=###CNI_SELECTION###
-        ExecStartPost=/bin/sh -c '\
-          for cmd in kubectl crictl ctr; do \
-            ln -s /usr/local/bin/rke2 /usr/local/bin/$cmd; \
-          done'
         ExecStart=/bin/sh -c 'curl -kL -o /usr/local/bin/rke2 \
           "https://github.com/rancher/rke2/releases/download/${RKE2_VERSION}/rke2.linux-amd64"; \
           chmod +x /usr/local/bin/rke2; /usr/local/bin/rke2 --version; \

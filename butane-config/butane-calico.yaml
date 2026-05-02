@@ -1,45 +1,22 @@
 variant: fcos
 version: 1.5.0
-systemd:
-  units:
-    - name: install-calico.service
-      enabled: true
-      contents: |-
-        [Unit]
-        Description=Calico CNI Installer
-        After=network-online.target syslog.target install-k3s.service
-        Wants=network-online.target install-k3s.service
-        Requires=install-k3s.service
-
-        [Service]
-        Type=oneshot
-        TimeoutStartSec=2400
-        Environment=KUBECONFIG='/etc/rancher/rke2/rke2.yaml'
-        Environment=CALICO_VERSION=###CALICO_VERSION###
-        Environment=POD_CIDR=###POD_CIDR###
-        Environment=API_SERVER_IP=###FLOATINGIP###
-        Environment=API_SERVER_PORT=6444
-        Environment=PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/var/opt/bin"
-        ExecStartPre=/bin/bash -c ' \
-              until kubectl get node; do \
-                echo "Waiting for kubectl response to available..."; \
-                sleep 5; \
-              done'
-        ExecStart=/bin/sh -c ' \
-          kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/operator-crds.yaml; \
-          kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/${CALICO_VERSION}/manifests/tigera-operator.yaml; \
-          curl https://raw.githubusercontent.com/projectcalico/calico/###CALICO_VERSION###/manifests/custom-resources-bpf.yaml -o /tmp/custom-resources.yaml; \
-          sed -i "s|cidr: 192.168.0.0/16|cidr: ${POD_CIDR}|g" /tmp/custom-resources.yaml; \
-          sed -i "s|bpfNetworkBootstrap: Enabled|bpfNetworkBootstrap: Disabled|g" /tmp/custom-resources.yaml; \
-          sed -i "s|kubeProxyManagement: Enabled|kubeProxyManagement: Disabled|g" /tmp/custom-resources.yaml; \
-          kubectl create -f /tmp/custom-resources.yaml; \
-          echo "{\\\"kind\\\":\\\"ConfigMap\\\",\\\"apiVersion\\\":\\\"v1\\\",\\\"metadata\\\":{\\\"name\\\":\\\"kubernetes-services-endpoint\\\",\\\"namespace\\\":\\\"tigera-operator\\\"},\\\"data\\\":{\\\"KUBERNETES_SERVICE_HOST\\\":\\\"${API_SERVER_IP}\\\",\\\"KUBERNETES_SERVICE_PORT\\\":\\\"${API_SERVER_PORT}\\\"}}" | kubectl apply -f -; \
-          kubectl patch installation.operator/default --type='merge' -p '\''{"spec":{"flexVolumePath":"/usr/local/libexec/kubernetes/kubelet-plugins/volume/exec/"}}'\''; \
-          kubectl patch installation.operator/default --type='merge' -p '\''{"spec":{"calicoNetwork":{"containerIPForwarding":"Enabled"}}}'\''; \
-          mkdir -p /var/opt/bin; \
-          curl -L https://github.com/projectcalico/calico/releases/download/${CALICO_VERSION}/calicoctl-linux-amd64 -o /var/opt/bin/calicoctl; chmod +x /var/opt/bin/calicoctl \
-          '
-        RemainAfterExit=true
-
-        [Install]
-        WantedBy=multi-user.target
+storage:
+  files:
+    - path: /var/lib/rancher/rke2/server/manifests/rke2-calico-config.yaml
+      contents:
+        inline: |
+          ---
+          apiVersion: helm.cattle.io/v1
+          kind: HelmChartConfig
+          metadata:
+            name: rke2-calico
+            namespace: kube-system
+          spec:
+            valuesContent: |-
+              installation:
+                calicoNetwork:
+                  kubeProxyManagement: Enabled
+                  linuxDataplane: BPF
+              kubernetesServiceEndpoint:
+                host: "localhost"
+                port: "6443"

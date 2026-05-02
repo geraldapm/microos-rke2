@@ -13,8 +13,29 @@ storage:
           service-cidr: ###SERVICE_CIDR###
           disable-kube-proxy: true
           selinux: true
+          write-kubeconfig-mode: "0600"
           tls-san:
             - ###FLOATINGIP###
+          profile: "cis"
+          # For cis-1.11 only, not needed on cis-1.9/cis-1.10
+          kube-controller-manager-arg:
+            - "tls-min-version=VersionTLS12"
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+          kube-scheduler-arg:
+            - "tls-min-version=VersionTLS12"
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+          kube-apiserver-arg:
+            - "tls-min-version=VersionTLS12"
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+            - "request-timeout=300s"
+            - 'service-account-extend-token-expiration=false'
+
+          # Enable only when auditing is enabled, blocks API when audit fails
+          #- "audit-log-mode=blocking-strict"
+
+          kubelet-arg:
+            - "protect-kernel-defaults=true"
+            - "streaming-connection-idle-timeout=5m" 
 systemd:
   units:
     - name: rke2-server.service
@@ -23,8 +44,8 @@ systemd:
         [Unit]
         Description=Rancher Kubernetes Engine v2 (server)
         Documentation=https://github.com/rancher/rke2#readme
-        Wants=network-online.target install-rke2.service
-        After=network-online.target install-rke2.service
+        Wants=network-online.target install-rke2.service install-rke2-selinux.service
+        After=network-online.target install-rke2.service install-rke2-selinux.service
 
         [Install]
         WantedBy=multi-user.target
@@ -45,12 +66,14 @@ systemd:
         RestartSec=5s
         Environment=HOME=/root
         ExecCondition=/bin/sh -c 'if systemctl is-active --quiet rke2-agent.service; then echo "Error: rke2-agent is running!"; exit 1; fi'
+        ExecStartPre=/bin/bash -c 'useradd -r -c "etcd user" -s /sbin/nologin -M etcd -U'
         ExecStartPre=/bin/bash -c ' \
               while [ ! -e /usr/local/bin/rke2 ]; do \
                 echo "Waiting for /usr/local/bin/rke2 to exists..."; \
                 sleep 5; \
               done'
         ExecStartPre=-/sbin/modprobe br_netfilter
+        ExecStartPre=/bin/bash -c 'restorecon -Rv /var/lib/rancher/rke2'
         ExecStartPre=-/sbin/modprobe overlay
         ExecStart=/usr/local/bin/rke2 server
         ExecStopPost=-/bin/sh -c "systemd-cgls /system.slice/%n | grep -Eo '[0-9]+ (containerd|kubelet)' | awk '{print $1}' | xargs -r kill"

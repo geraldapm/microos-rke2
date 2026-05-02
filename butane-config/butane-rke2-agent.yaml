@@ -8,6 +8,9 @@ storage:
           ###CLUSTERMODE###
           token: ###RKE2_TOKEN###
           node-ip: ###IP_ADDRESS###
+          kubelet-arg:
+            - "protect-kernel-defaults=true"
+            - "streaming-connection-idle-timeout=5m" 
 systemd:
   units:
     - name: k3s-agent.service
@@ -16,8 +19,8 @@ systemd:
         [Unit]
         Description=Rancher Kubernetes Engine v2 (agent)
         Documentation=https://github.com/rancher/rke2#readme
-        Wants=network-online.target install-rke2.service
-        After=network-online.target install-rke2.service
+        Wants=network-online.target install-rke2.service install-rke2-selinux.service
+        After=network-online.target install-rke2.service install-rke2-selinux.service
 
         [Install]
         WantedBy=multi-user.target
