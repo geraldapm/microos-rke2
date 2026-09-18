@@ -33,6 +33,9 @@ mkdir -p $BUTANE_GENERATED_DIR $IGNITION_DIR
 ### Generate ssh butane config
 bash ./scripts/ssh-generator.sh
 
+### Generate hosts butane config
+bash ./scripts/hosts-generator.sh
+
 ### Generate haproxy butane config
 floating_ip=$IP_FLOATING hostlist="$hostlist" bash ./scripts/haproxy-generator.sh
 fi
@@ -88,6 +91,9 @@ for vm in ${vms[*]}; do
                     $(cat $BUTANE_AUTOGEN_DIR/butane-ssh.yaml \
                         | butane)
                 - inline: |-
+                    $(cat $BUTANE_AUTOGEN_DIR/butane-hosts.yaml \
+                        | butane)
+                - inline: |-
                     $(cat $BUTANE_STATIC_DIR/butane-keepalived.yaml \
                         | sed "s+###FLOATINGIP###+$IP_FLOATING+g" \
                         | sed "s+###KEEPALIVED_PRIORITY###+200+g" \
@@ -136,6 +142,9 @@ EOF
                     $(cat $BUTANE_AUTOGEN_DIR/butane-ssh.yaml \
                         | butane)
                 - inline: |-
+                    $(cat $BUTANE_AUTOGEN_DIR/butane-hosts.yaml \
+                        | butane)
+                - inline: |-
                     $(cat $BUTANE_STATIC_DIR/butane-keepalived.yaml \
                         | sed "s+###FLOATINGIP###+$IP_FLOATING+g" \
                         | sed "s+###KEEPALIVED_PRIORITY###+100+g" \
@@ -179,6 +188,9 @@ EOF
                         | butane)
                 - inline: |-
                     $(cat $BUTANE_AUTOGEN_DIR/butane-ssh.yaml \
+                        | butane)
+                - inline: |-
+                    $(cat $BUTANE_AUTOGEN_DIR/butane-hosts.yaml \
                         | butane)
                 - inline: |-
                     $(cat $BUTANE_STATIC_DIR/butane-rke2-installer.yaml \
