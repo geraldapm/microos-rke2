@@ -5,9 +5,14 @@ mkdir -p butane-autogen
 output_yaml="butane-autogen/butane-ssh.yaml"
 indent="          "
 
-ssh_privkey_raw=$(cat ~/.ssh/id_rsa)
+### Generate ssh key-pairs with "ssh-keygen -t rsa"
+### Copy from ~/.ssh/id_rsa.pub
 
+ssh_privkey_raw=$(cat ~/.ssh/id_rsa)
 ssh_privkey=$(echo "$ssh_privkey_raw" | sed "s/^/${indent}/")
+ssh_pubkey_raw=$(cat ~/.ssh/id_rsa.pub)
+ssh_pubkey=$(echo "$ssh_pubkey_raw" | sed "s/^/${indent}/")
+
 
 # Write the header to the output YAML file
 cat > "$output_yaml" <<-EOF
@@ -19,6 +24,14 @@ storage:
       contents:
         inline: |
 $ssh_privkey
+    - path: /root/.ssh/id_rsa.pub
+      contents:
+        inline: |
+$ssh_pubkey
+    - path: /root/.ssh/authorized_keys
+      contents:
+        inline: |
+$ssh_pubkey
 EOF
 
 echo "SSH passwordless key have been generated successfully!"

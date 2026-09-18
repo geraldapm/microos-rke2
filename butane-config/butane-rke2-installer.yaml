@@ -32,11 +32,11 @@ systemd:
         Environment=RKE2_VERSION=###RKE2_VERSION###
         Environment=CNI_SELECTION=###CNI_SELECTION###
         ExecStart=/bin/sh -c 'curl -kL -o /usr/local/bin/rke2 \
-          "https://github.com/rancher/rke2/releases/download/${RKE2_VERSION}/rke2.linux-amd64"; \
+          "###RKE2_BINARY_URL###"; \
           chmod +x /usr/local/bin/rke2; /usr/local/bin/rke2 --version; \
           mkdir -p /var/lib/rancher/rke2/agent/images; \
-          curl -kL "https://github.com/rancher/rke2/releases/download/${RKE2_VERSION}/rke2-images.linux-amd64.tar.zst" -o  /var/lib/rancher/rke2/agent/images/rke2-images-amd64.tar.zst; \
-          curl -kL "https://github.com/rancher/rke2/releases/download/${RKE2_VERSION}/rke2-images-${CNI_SELECTION}.linux-amd64.tar.zst" -o  /var/lib/rancher/rke2/agent/images/rke2-images-${CNI_SELECTION}-amd64.tar.zst;'
+          curl -kL "###RKE2_IMAGE_URL###" -o  /var/lib/rancher/rke2/agent/images/rke2-images-amd64.tar.zst; \
+          curl -kL "###RKE2_CNI_URL###" -o  /var/lib/rancher/rke2/agent/images/rke2-images-${CNI_SELECTION}-amd64.tar.zst;'
         RemainAfterExit=true
 
         [Install]

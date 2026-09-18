@@ -6,6 +6,7 @@ storage:
       contents:
         inline: |
           ###CLUSTERMODE###
+          cni: ###CNIMODE###
           token: ###RKE2_TOKEN###
           node-ip: ###IP_ADDRESS###
           kubelet-arg:

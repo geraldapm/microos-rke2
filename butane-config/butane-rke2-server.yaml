@@ -6,6 +6,7 @@ storage:
       contents:
         inline: |
           ###CLUSTERMODE###
+          cni: ###CNIMODE###
           token: ###RKE2_TOKEN###
           node-ip: ###IP_ADDRESS###
           advertise-address: ###IP_ADDRESS###
@@ -66,7 +67,7 @@ systemd:
         RestartSec=5s
         Environment=HOME=/root
         ExecCondition=/bin/sh -c 'if systemctl is-active --quiet rke2-agent.service; then echo "Error: rke2-agent is running!"; exit 1; fi'
-        ExecStartPre=/bin/bash -c 'useradd -r -c "etcd user" -s /sbin/nologin -M etcd -U'
+        ExecStartPre=/bin/bash -c 'useradd -r -c "etcd user" -s /sbin/nologin -M etcd -U || true'
         ExecStartPre=/bin/bash -c ' \
               while [ ! -e /usr/local/bin/rke2 ]; do \
                 echo "Waiting for /usr/local/bin/rke2 to exists..."; \

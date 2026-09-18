@@ -16,6 +16,15 @@ chmod +x butane
 - Allocatable IP Addresses for each vms
 - FAST Internet connection for downloading required binaries
 
+- If you want to serve your own installer, use nginx instead:
+```bash
+podman run --replace -d \
+  --name nginx-static \
+  -p 8080:80 \
+  -v /home/gerald/Documents/kubernetes/nginx/:/usr/share/nginx/html:Z \
+  docker.io/library/nginx:latest
+```
+
 ## Environments
 
 3 Control Plane Nodes and 2 Worker Nodes installed with Flatcar Linux and Kubernetes v1.35 cluster with Calico CNI v3.31.5. The spec is 2 vCPU, 2GB Memory and 20GB Stoage (in rootfs). It also has the Floating IP for kubernetes api server reachability and enabling High-Availability, Edit the subnet, ip and hostnames in file [hostlist.sh](./hostlist.sh).
