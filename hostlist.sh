@@ -14,8 +14,8 @@ IP_FLOATING="$(echo $IP_SUBNET | cut -d. -f1-3).99"
 ### Ensure that the hostname has "wontrol" and "worker" inside for node role filtering
 hostlist=$(cat <<EOF
 192.168.100.101     gpmrke2controlplane1
-192.168.100.102     gpmrke2controlplane2
-192.168.100.103     gpmrke2controlplane3
+192.168.100.104     gpmrke2worker1    
+192.168.100.105     gpmrke2worker2
 EOF
 )
 # hostlist=$(cat <<EOF
