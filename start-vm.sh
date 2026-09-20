@@ -17,7 +17,7 @@ IGNITION_DIR=$CURRENT_DIR/ignition
 ### VM Specs
 VCPU=2
 MEMORY_MB=4096
-NETWORK_IFACE=virbr1
+NETWORK_IFACE=virbr3
 
 
 for vm in ${vms[*]}; do 
@@ -39,7 +39,7 @@ then
     --import \
     --disk path=$IMAGE_DIR/$vm.qcow2,device=disk,bus=virtio \
     --os-variant opensuse-unknown \
-    --network network=rke2,model=virtio \
+    --network bridge=$NETWORK_IFACE,model=virtio \
     --graphics vnc,listen=0.0.0.0 --noautoconsole \
     --sysinfo type=fwcfg,entry0.name="opt/com.coreos/config",entry0.file="$IGNITION_DIR/$vm.ign"
 
