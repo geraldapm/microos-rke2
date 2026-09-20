@@ -39,13 +39,13 @@ then
     --import \
     --disk path=$IMAGE_DIR/$vm.qcow2,device=disk,bus=virtio \
     --os-variant opensuse-unknown \
-    --network bridge=$NETWORK_IFACE,model=virtio \
+    --network network=rke2,model=virtio \
     --graphics vnc,listen=0.0.0.0 --noautoconsole \
     --sysinfo type=fwcfg,entry0.name="opt/com.coreos/config",entry0.file="$IGNITION_DIR/$vm.ign"
 
     # give delay so that the first controlplane always boot first
-    echo "Sleeping for 1m"
-    sleep 1m
+    echo "Sleeping for 3m"
+    sleep 3m
 else
     virsh start $vm
 fi

@@ -17,24 +17,7 @@ storage:
           write-kubeconfig-mode: "0600"
           tls-san:
             - ###FLOATINGIP###
-          kube-controller-manager-arg:
-            - "tls-min-version=VersionTLS12"
-            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
-          kube-scheduler-arg:
-            - "tls-min-version=VersionTLS12"
-            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
-          kube-apiserver-arg:
-            - "tls-min-version=VersionTLS12"
-            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
-            - "request-timeout=300s"
-            - 'service-account-extend-token-expiration=false'
-
-          # Enable only when auditing is enabled, blocks API when audit fails
-          #- "audit-log-mode=blocking-strict"
-
-          kubelet-arg:
-            - "protect-kernel-defaults=true"
-            - "streaming-connection-idle-timeout=5m" 
+            - ###IP_ADDRESS###
 systemd:
   units:
     - name: rke2-server.service

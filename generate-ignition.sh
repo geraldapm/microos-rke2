@@ -8,7 +8,7 @@ source hostlist.sh
 vms=($(echo "$hostlist" | awk '{print $2}'))
 
 ### Define the first controlplane IP to init the kubeadm cluster
-IP_RANGE_CONTROLPLANE1=192.168.100.101
+IP_RANGE_CONTROLPLANE1="$(echo $IP_SUBNET | cut -d. -f1-3).101"
 
 ### Define the default directory gen
 CURRENT_DIR=$(pwd)
@@ -35,9 +35,6 @@ bash ./scripts/ssh-generator.sh
 
 ### Generate hosts butane config
 bash ./scripts/hosts-generator.sh
-
-### Generate haproxy butane config
-floating_ip=$IP_FLOATING hostlist="$hostlist" bash ./scripts/haproxy-generator.sh
 fi
 
 RKE2_TOKEN="RKE2_SECRET_TOKEN"
@@ -51,9 +48,9 @@ CNI_PROVIDER=cilium
 # RKE2_IMAGE_URL="https://github.com/rancher/rke2/releases/download/${RKE2_VERSION}/rke2-images.linux-amd64.tar.zst"
 # RKE2_CNI_URL="https://github.com/rancher/rke2/releases/download/${RKE2_VERSION}/rke2-images-${CNI_SELECTION}.linux-amd64.tar.zst"
 
-RKE2_BINARY_URL='http://192.168.100.1:8080/rke2/${RKE2_VERSION}/rke2.linux-amd64'
-RKE2_IMAGE_URL='http://192.168.100.1:8080/rke2/${RKE2_VERSION}/rke2-images.linux-amd64.tar.zst'
-RKE2_CNI_URL='http://192.168.100.1:8080/rke2/${RKE2_VERSION}/rke2-images-${CNI_SELECTION}.linux-amd64.tar.zst'
+RKE2_BINARY_URL='http://192.168.103.1:8080/rke2/${RKE2_VERSION}/rke2.linux-amd64'
+RKE2_IMAGE_URL='http://192.168.103.1:8080/rke2/${RKE2_VERSION}/rke2-images.linux-amd64.tar.zst'
+RKE2_CNI_URL='http://192.168.103.1:8080/rke2/${RKE2_VERSION}/rke2-images-${CNI_SELECTION}.linux-amd64.tar.zst'
 
 
 for vm in ${vms[*]}; do 
@@ -94,12 +91,8 @@ for vm in ${vms[*]}; do
                     $(cat $BUTANE_AUTOGEN_DIR/butane-hosts.yaml \
                         | butane)
                 - inline: |-
-                    $(cat $BUTANE_STATIC_DIR/butane-keepalived.yaml \
+                    $(cat $BUTANE_STATIC_DIR/butane-kube-vip.yaml \
                         | sed "s+###FLOATINGIP###+$IP_FLOATING+g" \
-                        | sed "s+###KEEPALIVED_PRIORITY###+200+g" \
-                        | butane)
-                - inline: |-
-                    $(cat $BUTANE_AUTOGEN_DIR/butane-haproxy.yaml \
                         | butane)
                 - inline: |-
                     $(cat $BUTANE_STATIC_DIR/butane-rke2-installer.yaml \
@@ -145,12 +138,8 @@ EOF
                     $(cat $BUTANE_AUTOGEN_DIR/butane-hosts.yaml \
                         | butane)
                 - inline: |-
-                    $(cat $BUTANE_STATIC_DIR/butane-keepalived.yaml \
+                    $(cat $BUTANE_STATIC_DIR/butane-kube-vip.yaml \
                         | sed "s+###FLOATINGIP###+$IP_FLOATING+g" \
-                        | sed "s+###KEEPALIVED_PRIORITY###+100+g" \
-                        | butane)
-                - inline: |-
-                    $(cat $BUTANE_AUTOGEN_DIR/butane-haproxy.yaml \
                         | butane)
                 - inline: |-
                     $(cat $BUTANE_STATIC_DIR/butane-rke2-installer.yaml \
