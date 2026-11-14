@@ -12,12 +12,27 @@ storage:
           advertise-address: ###IP_ADDRESS###
           cluster-cidr: ###POD_CIDR###
           service-cidr: ###SERVICE_CIDR###
+          ingress-controller: none
+          disable-cloud-controller: true
           disable-kube-proxy: true
           selinux: true
           write-kubeconfig-mode: "0600"
-          tls-san:
+          tls-san: 
             - ###FLOATINGIP###
             - ###IP_ADDRESS###
+          profile: "cis"
+          # For cis-1.11 only, not needed on cis-1.9/cis-1.10
+          kube-controller-manager-arg:
+            - "tls-min-version=VersionTLS12"
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+          kube-scheduler-arg:
+            - "tls-min-version=VersionTLS12"
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+          kube-apiserver-arg:
+            - "tls-min-version=VersionTLS12"
+            - "tls-cipher-suites=TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"
+            - "request-timeout=300s"
+            - 'service-account-extend-token-expiration=false'
 systemd:
   units:
     - name: rke2-server.service
