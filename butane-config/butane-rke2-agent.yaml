@@ -14,7 +14,7 @@ storage:
             - "streaming-connection-idle-timeout=5m" 
 systemd:
   units:
-    - name: k3s-agent.service
+    - name: rke2-agent.service
       enabled: true
       contents: |
         [Unit]
